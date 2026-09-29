@@ -1,0 +1,11 @@
+[tools]
+go = "1.27.1"
+
+[env]
+POSTGRES_HOST = "localhost"
+POSTGRES_USER = "postgres"
+POSTGRES_PASSWORD = "4ZDjVLPHrP25xcAdxEu1zBXIe"
+POSTGRES_DB = "blog"
+POSTGRES_PORT = "5432"
+DATABASE_URL = "postgres://{{env.POSTGRES_USER}}:{{env.POSTGRES_PASSWORD}}@localhost:5432/{{env.POSTGRES_DB}}?sslmode=disable"
+APP_PORT = "8080"
