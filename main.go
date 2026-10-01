@@ -7,15 +7,14 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/rqpt/blog/internal/db"
 )
 
 func main() {
 	// Establish a connection to the database.
-	conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+	conn, err := db.InitConnection()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-		os.Exit(1)
+		log.Fatalf("Unable to establish database connection: %v\n", err)
 	}
 	defer conn.Close(context.Background())
 
@@ -24,5 +23,10 @@ func main() {
 		fmt.Fprint(w, "<body>Welcome!</body>")
 	})
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	appPort := os.Getenv("APP_PORT")
+	if appPort == "" {
+		log.Fatal("APP_PORT is not set")
+	}
+
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", appPort), nil))
 }
