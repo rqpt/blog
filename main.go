@@ -19,14 +19,14 @@ func main() {
 	defer conn.Close(context.Background())
 
 	// Serve a basic homepage.
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, "<body>Welcome!</body>")
-	})
-
 	appPort := os.Getenv("APP_PORT")
 	if appPort == "" {
 		log.Fatal("APP_PORT is not set")
 	}
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, "<body>Welcome!</body>")
+	})
 
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", appPort), nil))
 }
