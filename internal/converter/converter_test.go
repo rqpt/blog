@@ -1,4 +1,4 @@
-package main
+package converter
 
 import (
 	"bytes"
@@ -28,7 +28,7 @@ func Test_mdToHtml(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := mdToHtml(tt.md)
+			got := MdToHtml(tt.md)
 			if !bytes.Equal(got, tt.want) {
 				t.Errorf("mdToHtml() = %v, want %v", string(got), string(tt.want))
 			}
