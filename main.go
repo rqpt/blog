@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/rqpt/blog/internal/db"
+	"github.com/rqpt/blog/internal/handlers"
 )
 
 func main() {
@@ -19,6 +20,8 @@ func main() {
 	defer conn.Close(context.Background())
 
 	// Serve a basic homepage.
+	handler := handlers.NewHandler(conn)
+
 	appPort := os.Getenv("APP_PORT")
 	if appPort == "" {
 		log.Fatal("APP_PORT is not set")
@@ -30,9 +33,4 @@ func main() {
 			handler.Routes(),
 		),
 	)
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, "<body>Welcome!</body>")
-	})
-
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", appPort), nil))
 }
