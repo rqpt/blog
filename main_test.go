@@ -29,7 +29,6 @@ func Test_mdToHtml(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := mdToHtml(tt.md)
-			// TODO: update the condition below to compare got with tt.want.
 			if !bytes.Equal(got, tt.want) {
 				t.Errorf("mdToHtml() = %v, want %v", string(got), string(tt.want))
 			}
