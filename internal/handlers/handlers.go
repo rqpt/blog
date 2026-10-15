@@ -19,6 +19,19 @@ func (h *Handler) postIndex(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "<body>Welcome!</body>")
 }
 
+func (h *Handler) postShow(w http.ResponseWriter, r *http.Request) {
+	postTitleSlug := r.PathValue("post")
+	postID := postTitleSlug[len(postTitleSlug)-1]
+
+	post, err := h.queries.ShowPost(r.Context(), int64(postID))
+	if err != nil {
+		fmt.Fprint(w, "<body>Post not found!</body>")
+		return
+	}
+
+	fmt.Fprintf(w, "<body>Post found! Title is '%v'", post.Title)
+}
+
 func (h *Handler) postCreate(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
