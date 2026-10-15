@@ -37,3 +37,21 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (CreateP
 	err := row.Scan(&i.ID, &i.Title, &i.CreatedAt)
 	return i, err
 }
+
+const showPost = `-- name: ShowPost :one
+SELECT id, title, body, created_at, updated_at FROM posts
+WHERE id = $1
+`
+
+func (q *Queries) ShowPost(ctx context.Context, id int64) (Post, error) {
+	row := q.db.QueryRow(ctx, showPost, id)
+	var i Post
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.Body,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
