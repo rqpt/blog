@@ -56,6 +56,19 @@ func (h *Handler) postCreate(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(newPost)
 }
 
+func getIDFromSlug(slug string) int64 {
+	// Reverse the slug string
+
+	// Iterate through the revSlug and append a new ID string with each char
+	// in revSlug before we hit a hyphen.
+
+	// Try and convert the string to an int64, and if we're not able to,
+	// we know the slug never ended with a useable ID.
+
+	// Return the ID.
+	return 0
+}
+
 func NewHandler(conn *pgx.Conn) *Handler {
 	return &Handler{
 		conn:    conn,
