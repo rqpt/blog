@@ -11,8 +11,9 @@ func Test_getTitleAndIDFromSlug(t *testing.T) {
 		want2 int64
 	}{
 		{"Slugs with no hyphens returns a blank string and 0", "nohyphen", "", 0},
-		{"Slugs where the last segment is non-numeric returns a blank string and 0", "hyphen-sixteen", "", 0},
+		{"Slugs where the last segment is non-numeric returns a blank title and 0", "hyphen-sixteen", "", 0},
 		{"Slugs where the last segment is numeric returns the title and ID", "hyphen-myphen-16", "hyphen-myphen", 16},
+		{"Slugs with only a numeric segment returns a blank title and the ID", "16", "", 16},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
