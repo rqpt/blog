@@ -26,3 +26,37 @@ func Test_getTitleAndIDFromSlug(t *testing.T) {
 		})
 	}
 }
+
+func Test_makeSlug(t *testing.T) {
+	tests := []struct {
+		name string // description of this test case
+		// Named input parameters for target function.
+		input   string
+		want    string
+		wantErr bool
+	}{
+		{
+			"Can make slug from a string",
+			"  Water is wet? $#*  ",
+			"water-is-wet",
+			false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, gotErr := makeSlug(tt.input)
+			if gotErr != nil {
+				if !tt.wantErr {
+					t.Errorf("makeSlug() failed: %v", gotErr)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Fatal("makeSlug() succeeded unexpectedly")
+			}
+			if got != tt.want {
+				t.Errorf("makeSlug() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

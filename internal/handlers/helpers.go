@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -21,3 +22,17 @@ func getTitleAndIDFromSlug(slug string) (string, int64) {
 	return title, id
 }
 
+func makeSlug(input string) (string, error) {
+	reg, err := regexp.Compile("[^a-zA-Z0-9]+")
+	if err != nil {
+		return "", err
+	}
+
+	processedString := reg.ReplaceAllString(input, " ")
+	processedString = strings.TrimSpace(processedString)
+
+	slug := strings.ReplaceAll(processedString, " ", "-")
+	slug = strings.ToLower(slug)
+
+	return slug, nil
+}
