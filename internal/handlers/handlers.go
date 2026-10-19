@@ -19,6 +19,44 @@ func (h *Handler) postIndex(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "<body>Welcome!</body>")
 }
 
+func (h *Handler) postShow(w http.ResponseWriter, r *http.Request) {
+	pathSlug := r.PathValue("post")
+	pathSlugTitle, pathSlugID := getTitleAndIDFromSlug(pathSlug)
+	if pathSlugID == 0 {
+		http.NotFound(w, r)
+		return
+	}
+
+	post, err := h.queries.ShowPost(r.Context(), int64(pathSlugID))
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	postSlugTitle, err := makeSlug(post.Title)
+	if err != nil {
+		http.Error(
+			w,
+			"Post Title could not be converted to a slug",
+			http.StatusInternalServerError,
+		)
+		return
+	}
+
+	if postSlugTitle != pathSlugTitle {
+		http.Redirect(
+			w,
+			r,
+			fmt.Sprintf("/%v-%v", postSlugTitle, post.ID),
+			http.StatusMovedPermanently,
+		)
+		return
+	}
+
+	// TODO: Display the post nicely using templ, and maybe classless picoCSS.
+	fmt.Fprintf(w, "<body>Post found! Title is '%v'", post.Title)
+}
+
 func (h *Handler) postCreate(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
