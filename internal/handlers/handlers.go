@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/rqpt/blog/internal/converter"
 	"github.com/rqpt/blog/internal/db"
+	"github.com/rqpt/blog/internal/services"
 )
 
 type Handler struct {
@@ -61,7 +61,7 @@ func (h *Handler) postCreate(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	md := r.PostFormValue("body")
-	html := converter.MdToHtml([]byte(md))
+	html := services.MdToHtml([]byte(md))
 
 	newPost, err := h.queries.CreatePost(
 		r.Context(),
