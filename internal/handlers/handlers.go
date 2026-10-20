@@ -22,6 +22,7 @@ func (h *Handler) postIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) postShow(w http.ResponseWriter, r *http.Request) {
+	// TODO: Make sure we can serve as either html or json.
 	pathSlug := r.PathValue("post")
 	pathSlugTitle, pathSlugID := getTitleAndIDFromSlug(pathSlug)
 	if pathSlugID == 0 {
