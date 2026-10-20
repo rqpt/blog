@@ -19,7 +19,7 @@ func main() {
 	}
 	defer conn.Close(context.Background())
 
-	// Serve a basic homepage.
+	// Serve the site.
 	handler := handlers.NewHandler(conn)
 
 	appPort := os.Getenv("APP_PORT")
