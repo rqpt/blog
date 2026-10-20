@@ -3,10 +3,12 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"net/http"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/rqpt/blog/internal/db"
+	"github.com/rqpt/blog/internal/renderer"
 	"github.com/rqpt/blog/internal/services"
 )
 
@@ -53,8 +55,14 @@ func (h *Handler) postShow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: Display the post nicely using templ, and maybe classless picoCSS.
-	fmt.Fprintf(w, "<body>Post found! Title is '%v'", post.Title)
+	// TODO: Display the post nicely using a template,
+	// and maybe classless picoCSS.
+	data := renderer.PostProp{
+		Title: post.Title,
+		Body:  template.HTML(post.Body),
+	}
+
+	renderer.Render(w, renderer.PostShow, "layout", data)
 }
 
 func (h *Handler) postCreate(w http.ResponseWriter, r *http.Request) {
