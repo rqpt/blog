@@ -12,16 +12,16 @@ import (
 	"github.com/rqpt/blog/internal/services"
 )
 
-type Handler struct {
+type PostHandler struct {
 	conn    *pgx.Conn
 	queries *db.Queries
 }
 
-func (h *Handler) postIndex(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "<body>Welcome!</body>")
+func (h *PostHandler) Index(w http.ResponseWriter, r *http.Request) {
+	renderer.Render(w, renderer.PostIndex, "layout", nil)
 }
 
-func (h *Handler) postShow(w http.ResponseWriter, r *http.Request) {
+func (h *PostHandler) Show(w http.ResponseWriter, r *http.Request) {
 	// TODO: Make sure we can serve as either html or json.
 	pathSlug := r.PathValue("post")
 	pathSlugTitle, pathSlugID := getTitleAndIDFromSlug(pathSlug)
@@ -56,8 +56,6 @@ func (h *Handler) postShow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: Display the post nicely using a template,
-	// and maybe classless picoCSS.
 	data := renderer.PostProp{
 		Title: post.Title,
 		Body:  template.HTML(post.Body),
@@ -66,7 +64,7 @@ func (h *Handler) postShow(w http.ResponseWriter, r *http.Request) {
 	renderer.Render(w, renderer.PostShow, "layout", data)
 }
 
-func (h *Handler) postCreate(w http.ResponseWriter, r *http.Request) {
+func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	md := r.PostFormValue("body")
@@ -90,8 +88,8 @@ func (h *Handler) postCreate(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(newPost)
 }
 
-func NewHandler(conn *pgx.Conn) *Handler {
-	return &Handler{
+func NewPostHandler(conn *pgx.Conn) *PostHandler {
+	return &PostHandler{
 		conn:    conn,
 		queries: db.New(conn),
 	}

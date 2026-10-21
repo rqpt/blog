@@ -9,6 +9,7 @@ import (
 
 	"github.com/rqpt/blog/internal/db"
 	"github.com/rqpt/blog/internal/handlers"
+	"github.com/rqpt/blog/internal/router"
 )
 
 func main() {
@@ -20,7 +21,13 @@ func main() {
 	defer conn.Close(context.Background())
 
 	// Serve the site.
-	handler := handlers.NewHandler(conn)
+	postHandler := handlers.NewPostHandler(conn)
+
+	router := router.NewRouter(
+		router.Handlers{
+			Posts: postHandler,
+		},
+	)
 
 	appPort := os.Getenv("APP_PORT")
 	if appPort == "" {
@@ -30,7 +37,7 @@ func main() {
 	log.Fatal(
 		http.ListenAndServe(
 			fmt.Sprintf(":%v", appPort),
-			handler.Routes(),
+			router,
 		),
 	)
 }
