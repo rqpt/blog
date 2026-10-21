@@ -19,15 +19,15 @@ func respondError(
 	status int,
 	wantsJSON bool,
 ) {
-	if wantsJSON {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(status)
-
-		_ = json.NewEncoder(w).Encode(map[string]string{
-			"error": message,
-		})
+	if !wantsJSON {
+		http.Error(w, message, status)
 		return
 	}
 
-	http.Error(w, message, status)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+
+	_ = json.NewEncoder(w).Encode(map[string]string{
+		"error": message,
+	})
 }
