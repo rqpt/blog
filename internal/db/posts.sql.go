@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createPost = `-- name: CreatePost :one
+const postCreate = `-- name: PostCreate :one
 INSERT INTO posts (
     title, body
 ) VALUES (
@@ -20,31 +20,31 @@ INSERT INTO posts (
 RETURNING id, title, created_at
 `
 
-type CreatePostParams struct {
+type PostCreateParams struct {
 	Title string `json:"title"`
 	Body  string `json:"body"`
 }
 
-type CreatePostRow struct {
+type PostCreateRow struct {
 	ID        int64              `json:"id"`
 	Title     string             `json:"title"`
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
-func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (CreatePostRow, error) {
-	row := q.db.QueryRow(ctx, createPost, arg.Title, arg.Body)
-	var i CreatePostRow
+func (q *Queries) PostCreate(ctx context.Context, arg PostCreateParams) (PostCreateRow, error) {
+	row := q.db.QueryRow(ctx, postCreate, arg.Title, arg.Body)
+	var i PostCreateRow
 	err := row.Scan(&i.ID, &i.Title, &i.CreatedAt)
 	return i, err
 }
 
-const showPost = `-- name: ShowPost :one
+const postShow = `-- name: PostShow :one
 SELECT id, title, body, created_at, updated_at FROM posts
 WHERE id = $1
 `
 
-func (q *Queries) ShowPost(ctx context.Context, id int64) (Post, error) {
-	row := q.db.QueryRow(ctx, showPost, id)
+func (q *Queries) PostShow(ctx context.Context, id int64) (Post, error) {
+	row := q.db.QueryRow(ctx, postShow, id)
 	var i Post
 	err := row.Scan(
 		&i.ID,

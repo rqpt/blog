@@ -1,4 +1,4 @@
--- name: CreatePost :one
+-- name: PostCreate :one
 INSERT INTO posts (
     title, body
 ) VALUES (
@@ -6,6 +6,6 @@ INSERT INTO posts (
 )
 RETURNING id, title, created_at;
 
--- name: ShowPost :one
+-- name: PostShow :one
 SELECT * FROM posts
 WHERE id = $1;

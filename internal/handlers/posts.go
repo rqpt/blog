@@ -35,7 +35,7 @@ func (h *PostHandler) Show(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post, err := h.queries.ShowPost(r.Context(), int64(pathSlugID))
+	post, err := h.queries.PostShow(r.Context(), pathSlugID)
 	if err != nil {
 		respondError(w, "Post not found", http.StatusNotFound, wantsJSON)
 		return
@@ -59,7 +59,7 @@ func (h *PostHandler) Show(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := renderer.PostProp{
+	data := renderer.PostProps{
 		Title: post.Title,
 		Body:  template.HTML(post.Body),
 	}
@@ -73,9 +73,9 @@ func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 	md := r.PostFormValue("body")
 	html := services.MdToHtml([]byte(md))
 
-	newPost, err := h.queries.CreatePost(
+	newPost, err := h.queries.PostCreate(
 		r.Context(),
-		db.CreatePostParams{
+		db.PostCreateParams{
 			Title: r.PostFormValue("title"),
 			Body:  string(html),
 		},
