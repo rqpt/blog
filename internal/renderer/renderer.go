@@ -12,10 +12,24 @@ type PostProp struct {
 	Body  template.HTML
 }
 
+var templatesPath = filepath.Join(
+	"internal",
+	"renderer",
+	"resources",
+	"templates",
+)
+
 var PostShow = template.Must(
 	template.ParseFiles(
-		filepath.Join("internal", "renderer", "templates", "posts", "show.html"),
-		filepath.Join("internal", "renderer", "templates", "components", "layout.html"),
+		filepath.Join(templatesPath, "components", "layout.html"),
+		filepath.Join(templatesPath, "posts", "show.html"),
+	),
+)
+
+var PostIndex = template.Must(
+	template.ParseFiles(
+		filepath.Join(templatesPath, "components", "layout.html"),
+		filepath.Join(templatesPath, "posts", "index.html"),
 	),
 )
 
