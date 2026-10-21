@@ -1,8 +1,8 @@
-package handlers
+package slug
 
 import "testing"
 
-func Test_getTitleAndIDFromSlug(t *testing.T) {
+func Test_Parse(t *testing.T) {
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.
@@ -17,7 +17,7 @@ func Test_getTitleAndIDFromSlug(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got2 := getTitleAndIDFromSlug(tt.slug)
+			got, got2 := Parse(tt.slug)
 			if got != tt.want {
 				t.Errorf("getTitleAndIDFromSlug() = %v, want %v", got, tt.want)
 			}
@@ -28,7 +28,7 @@ func Test_getTitleAndIDFromSlug(t *testing.T) {
 	}
 }
 
-func Test_makeSlug(t *testing.T) {
+func Test_Make(t *testing.T) {
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.
@@ -45,7 +45,7 @@ func Test_makeSlug(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, gotErr := makeSlug(tt.input)
+			got, gotErr := Make(tt.input)
 			if gotErr != nil {
 				if !tt.wantErr {
 					t.Errorf("makeSlug() failed: %v", gotErr)

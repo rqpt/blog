@@ -10,6 +10,7 @@ import (
 	"github.com/rqpt/blog/internal/db"
 	"github.com/rqpt/blog/internal/renderer"
 	"github.com/rqpt/blog/internal/services"
+	"github.com/rqpt/blog/internal/slug"
 )
 
 type PostHandler struct {
@@ -26,7 +27,7 @@ func (h *PostHandler) Show(w http.ResponseWriter, r *http.Request) {
 	wantsJSON := acceptsJSON(r)
 
 	pathSlug := r.PathValue("post")
-	pathSlugTitle, pathSlugID := getTitleAndIDFromSlug(pathSlug)
+	pathSlugTitle, pathSlugID := slug.Parse(pathSlug)
 	if pathSlugID == 0 {
 		respondError(w, "Post not found", http.StatusNotFound, wantsJSON)
 		return
@@ -38,7 +39,7 @@ func (h *PostHandler) Show(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	postSlugTitle, err := makeSlug(post.Title)
+	postSlugTitle, err := slug.Make(post.Title)
 	if err != nil {
 		respondError(
 			w,
