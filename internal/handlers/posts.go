@@ -18,41 +18,50 @@ type PostHandler struct {
 }
 
 func (h *PostHandler) Index(w http.ResponseWriter, r *http.Request) {
+	// TODO: Cater for both html and json requests
 	renderer.Render(w, renderer.PostIndex, "layout", nil)
 }
 
 func (h *PostHandler) Show(w http.ResponseWriter, r *http.Request) {
-	// TODO: Make sure we can serve as either html or json.
+	wantsJSON := acceptsJSON(r)
+
 	pathSlug := r.PathValue("post")
 	pathSlugTitle, pathSlugID := getTitleAndIDFromSlug(pathSlug)
 	if pathSlugID == 0 {
-		http.NotFound(w, r)
+		respondError(w, "Post not found", http.StatusNotFound, wantsJSON)
 		return
 	}
 
 	post, err := h.queries.ShowPost(r.Context(), int64(pathSlugID))
 	if err != nil {
-		http.NotFound(w, r)
+		respondError(w, "Post not found", http.StatusNotFound, wantsJSON)
 		return
 	}
 
 	postSlugTitle, err := makeSlug(post.Title)
 	if err != nil {
-		http.Error(
+		respondError(
 			w,
-			"Post Title could not be converted to a slug",
+			"Could not generate post slug",
 			http.StatusInternalServerError,
+			wantsJSON,
 		)
 		return
 	}
 
-	if postSlugTitle != pathSlugTitle {
+	if postSlugTitle != pathSlugTitle && !wantsJSON {
 		http.Redirect(
 			w,
 			r,
 			fmt.Sprintf("/%v-%v", postSlugTitle, post.ID),
 			http.StatusMovedPermanently,
 		)
+		return
+	}
+
+	if wantsJSON {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(post)
 		return
 	}
 

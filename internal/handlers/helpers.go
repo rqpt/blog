@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"encoding/json"
+	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
@@ -40,4 +42,30 @@ func makeSlug(input string) (string, error) {
 	slug = strings.ToLower(slug)
 
 	return slug, nil
+}
+
+func acceptsJSON(r *http.Request) bool {
+	return strings.Contains(
+		r.Header.Get("Accept"),
+		"application/json",
+	)
+}
+
+func respondError(
+	w http.ResponseWriter,
+	message string,
+	status int,
+	wantsJSON bool,
+) {
+	if wantsJSON {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(status)
+
+		_ = json.NewEncoder(w).Encode(map[string]string{
+			"error": message,
+		})
+		return
+	}
+
+	http.Error(w, message, status)
 }
