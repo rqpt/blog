@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+var nonAlphanumeric = regexp.MustCompile("[^a-zA-Z0-9]+")
+
 func Parse(slug string) (string, int64) {
 	lastHyphenIndex := strings.LastIndex(slug, "-")
 	if lastHyphenIndex == -1 {
@@ -27,17 +29,10 @@ func Parse(slug string) (string, int64) {
 	return title, id
 }
 
-func Make(input string) (string, error) {
-	reg, err := regexp.Compile("[^a-zA-Z0-9]+")
-	if err != nil {
-		return "", err
-	}
+func Make(input string) string {
+	processed := nonAlphanumeric.ReplaceAllString(input, " ")
+	processed = strings.TrimSpace(processed)
+	processed = strings.ReplaceAll(processed, " ", "-")
 
-	processedString := reg.ReplaceAllString(input, " ")
-	processedString = strings.TrimSpace(processedString)
-
-	slug := strings.ReplaceAll(processedString, " ", "-")
-	slug = strings.ToLower(slug)
-
-	return slug, nil
+	return strings.ToLower(processed)
 }

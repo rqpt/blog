@@ -39,16 +39,7 @@ func (h *PostHandler) Show(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	postSlugTitle, err := slug.Make(post.Title)
-	if err != nil {
-		respondError(
-			w,
-			"Could not generate post slug",
-			http.StatusInternalServerError,
-			wantsJSON,
-		)
-		return
-	}
+	postSlugTitle := slug.Make(post.Title)
 
 	if postSlugTitle != pathSlugTitle && !wantsJSON {
 		http.Redirect(
