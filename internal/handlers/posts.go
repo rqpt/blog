@@ -24,6 +24,8 @@ func (h *PostHandler) Index(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *PostHandler) Show(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Vary", "Accept")
+
 	wantsJSON := acceptsJSON(r)
 
 	pathSlug := r.PathValue("post")
