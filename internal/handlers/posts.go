@@ -13,6 +13,13 @@ import (
 	"github.com/rqpt/blog/internal/slug"
 )
 
+func NewPostHandler(conn *pgx.Conn) *PostHandler {
+	return &PostHandler{
+		conn:    conn,
+		queries: db.New(conn),
+	}
+}
+
 type PostHandler struct {
 	conn    *pgx.Conn
 	queries *db.Queries
@@ -89,11 +96,4 @@ func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(newPost)
-}
-
-func NewPostHandler(conn *pgx.Conn) *PostHandler {
-	return &PostHandler{
-		conn:    conn,
-		queries: db.New(conn),
-	}
 }
