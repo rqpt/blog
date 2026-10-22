@@ -1,4 +1,4 @@
-package converter
+package services
 
 import (
 	"github.com/gomarkdown/markdown"
