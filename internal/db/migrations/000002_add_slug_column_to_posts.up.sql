@@ -1,0 +1,2 @@
+ALTER TABLE posts
+ADD slug VARCHAR(255) UNIQUE;
