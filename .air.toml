@@ -8,9 +8,7 @@ tmp_dir = "tmp"
 [build]
   args_bin = []
   bin = "./tmp/main"
-  cmd = "go build -o ./tmp/main ."
-  # Debugging
-  # cmd = "go build -gcflags='all=-N -l' -o ./tmp/main ."
+  cmd = "CGO_ENABLED=0 go build -gcflags='all=-N -l' -o ./tmp/main ."
   delay = 1000
   entrypoint = ["./tmp/main"]
   exclude_dir = ["assets", "tmp", "vendor", "testdata"]
@@ -18,9 +16,7 @@ tmp_dir = "tmp"
   exclude_regex = ["_test.go"]
   exclude_unchanged = false
   follow_symlink = false
-  full_bin = ""
-  # Debugging
-  # full_bin = "/home/user/.local/bin/scripts/air-dlv"
+  full_bin = "/home/user/.local/bin/scripts/air-dlv"
   ignore_dangerous_root_dir = false
   include_dir = []
   include_ext = ["go", "tpl", "tmpl", "html"]
