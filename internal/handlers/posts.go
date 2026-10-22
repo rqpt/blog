@@ -75,6 +75,9 @@ func (h *PostHandler) Show(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
+	// TODO: When we create a post, the markdown should be split into
+	// frontmatter and content. Frontmatter should be saved on a new column
+	// and used, among other things, for SEO meta tags. Content used for html.
 	w.Header().Set("Content-Type", "application/json")
 
 	md := r.PostFormValue("body")
