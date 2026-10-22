@@ -36,7 +36,7 @@ func main() {
 
 	log.Fatal(
 		http.ListenAndServe(
-			fmt.Sprintf(":%v", appPort),
+			fmt.Sprint(":", appPort),
 			router,
 		),
 	)
