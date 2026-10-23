@@ -64,7 +64,7 @@ func (h *PostHandler) Show(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := renderer.PostProps{
+	data := renderer.PostShowProps{
 		Title: post.Title,
 		Body:  template.HTML(post.Body),
 	}
