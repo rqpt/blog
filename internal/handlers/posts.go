@@ -48,9 +48,7 @@ func (h *PostHandler) Show(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	postSlugTitle := slug.Make(post.Title)
-
-	if postSlugTitle != pathSlugTitle && !wantsJSON {
+	if post.Slug != pathSlug && !wantsJSON {
 		http.Redirect(
 			w,
 			r,
