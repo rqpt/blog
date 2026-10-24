@@ -109,10 +109,7 @@ func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{
-			"error": err.Error(),
-		})
+		helpers.RespondError(w, err.Error(), http.StatusInternalServerError, true)
 		return
 	}
 
