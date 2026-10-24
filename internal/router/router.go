@@ -13,9 +13,11 @@ type Handlers struct {
 func NewRouter(h Handlers) http.Handler {
 	mux := http.NewServeMux()
 
-	// TODO: post create should have some kind of auth middleware,
-	// and request rate limit.
+	// TODO: post create, update and delete should have some kind of auth
+	// middleware, and request rate limit associated with them.
 	mux.HandleFunc("POST /", h.Posts.Create)
+	mux.HandleFunc("DELETE /{post}", h.Posts.Delete)
+
 	mux.HandleFunc("GET /{$}", h.Posts.Index)
 	mux.HandleFunc("GET /{post}", h.Posts.Show)
 

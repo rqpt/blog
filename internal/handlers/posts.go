@@ -15,13 +15,11 @@ import (
 
 func NewPostHandler(dbPool *pgxpool.Pool) *PostHandler {
 	return &PostHandler{
-		dbPool:  dbPool,
 		queries: db.New(dbPool),
 	}
 }
 
 type PostHandler struct {
-	dbPool  *pgxpool.Pool
 	queries *db.Queries
 }
 
@@ -31,7 +29,7 @@ func (h *PostHandler) Index(w http.ResponseWriter, r *http.Request) {
 
 	wantsJSON := helpers.AcceptsJSON(r)
 
-	posts, err := h.queries.PostIndex(r.Context())
+	posts, err := h.queries.IndexPosts(r.Context())
 	if err != nil {
 		helpers.RespondError(w, "Posts not found", http.StatusNotFound, wantsJSON)
 		return
@@ -60,7 +58,7 @@ func (h *PostHandler) Show(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post, err := h.queries.PostShow(r.Context(), pathID)
+	post, err := h.queries.ShowPost(r.Context(), pathID)
 	if err != nil {
 		helpers.RespondError(w, "Post not found", http.StatusNotFound, wantsJSON)
 		return
@@ -101,20 +99,39 @@ func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 	md := r.PostFormValue("body")
 	html := services.MdToHtml([]byte(md))
 
-	newPost, err := h.queries.PostCreate(
+	newPost, err := h.queries.CreatePost(
 		r.Context(),
-		db.PostCreateParams{
+		db.CreatePostParams{
 			Title: r.PostFormValue("title"),
 			Body:  string(html),
 		},
 	)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{
-			"error": err.Error(),
-		})
+		helpers.RespondError(w, err.Error(), http.StatusInternalServerError, true)
 		return
 	}
 
 	json.NewEncoder(w).Encode(newPost)
+}
+
+func (h *PostHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-type", "application/json")
+
+	pathSlug := r.PathValue("post")
+
+	pathID, err := helpers.ParseID(pathSlug)
+	if pathID == 0 || err != nil {
+		helpers.RespondError(w, "Post not found", http.StatusNotFound, true)
+		return
+	}
+
+	err = h.queries.DeletePost(r.Context(), pathID)
+	if err != nil {
+		helpers.RespondError(w, err.Error(), http.StatusInternalServerError, true)
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": fmt.Sprintf("Successfully deleted post #%d", pathID),
+	})
 }
