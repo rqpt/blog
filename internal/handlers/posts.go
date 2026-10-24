@@ -115,3 +115,25 @@ func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(newPost)
 }
+
+func (h *PostHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-type", "application/json")
+
+	pathSlug := r.PathValue("post")
+
+	pathID, err := helpers.ParseID(pathSlug)
+	if pathID == 0 || err != nil {
+		helpers.RespondError(w, "Post not found", http.StatusNotFound, true)
+		return
+	}
+
+	err = h.queries.DeletePost(r.Context(), pathID)
+	if err != nil {
+		helpers.RespondError(w, err.Error(), http.StatusInternalServerError, true)
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": fmt.Sprintf("Successfully deleted post #%d", pathID),
+	})
+}
