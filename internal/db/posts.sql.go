@@ -11,27 +11,27 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const postCreate = `-- name: PostCreate :one
+const createPost = `-- name: CreatePost :one
 INSERT INTO posts (title, body)
 VALUES ($1, $2)
 RETURNING id, title, slug, created_at
 `
 
-type PostCreateParams struct {
+type CreatePostParams struct {
 	Title string `json:"title"`
 	Body  string `json:"body"`
 }
 
-type PostCreateRow struct {
+type CreatePostRow struct {
 	ID        int64              `json:"id"`
 	Title     string             `json:"title"`
 	Slug      string             `json:"slug"`
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
-func (q *Queries) PostCreate(ctx context.Context, arg PostCreateParams) (PostCreateRow, error) {
-	row := q.db.QueryRow(ctx, postCreate, arg.Title, arg.Body)
-	var i PostCreateRow
+func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (CreatePostRow, error) {
+	row := q.db.QueryRow(ctx, createPost, arg.Title, arg.Body)
+	var i CreatePostRow
 	err := row.Scan(
 		&i.ID,
 		&i.Title,
@@ -41,12 +41,22 @@ func (q *Queries) PostCreate(ctx context.Context, arg PostCreateParams) (PostCre
 	return i, err
 }
 
-const postIndex = `-- name: PostIndex :many
+const deletePost = `-- name: DeletePost :exec
+DELETE FROM posts
+WHERE id = $1
+`
+
+func (q *Queries) DeletePost(ctx context.Context, id int64) error {
+	_, err := q.db.Exec(ctx, deletePost, id)
+	return err
+}
+
+const indexPosts = `-- name: IndexPosts :many
 SELECT id, title, body, created_at, updated_at, slug FROM posts
 `
 
-func (q *Queries) PostIndex(ctx context.Context) ([]Post, error) {
-	rows, err := q.db.Query(ctx, postIndex)
+func (q *Queries) IndexPosts(ctx context.Context) ([]Post, error) {
+	rows, err := q.db.Query(ctx, indexPosts)
 	if err != nil {
 		return nil, err
 	}
@@ -72,13 +82,13 @@ func (q *Queries) PostIndex(ctx context.Context) ([]Post, error) {
 	return items, nil
 }
 
-const postShow = `-- name: PostShow :one
+const showPost = `-- name: ShowPost :one
 SELECT id, title, body, created_at, updated_at, slug FROM posts
 WHERE id = $1
 `
 
-func (q *Queries) PostShow(ctx context.Context, id int64) (Post, error) {
-	row := q.db.QueryRow(ctx, postShow, id)
+func (q *Queries) ShowPost(ctx context.Context, id int64) (Post, error) {
+	row := q.db.QueryRow(ctx, showPost, id)
 	var i Post
 	err := row.Scan(
 		&i.ID,

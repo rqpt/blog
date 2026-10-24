@@ -31,7 +31,7 @@ func (h *PostHandler) Index(w http.ResponseWriter, r *http.Request) {
 
 	wantsJSON := helpers.AcceptsJSON(r)
 
-	posts, err := h.queries.PostIndex(r.Context())
+	posts, err := h.queries.IndexPosts(r.Context())
 	if err != nil {
 		helpers.RespondError(w, "Posts not found", http.StatusNotFound, wantsJSON)
 		return
@@ -60,7 +60,7 @@ func (h *PostHandler) Show(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post, err := h.queries.PostShow(r.Context(), pathID)
+	post, err := h.queries.ShowPost(r.Context(), pathID)
 	if err != nil {
 		helpers.RespondError(w, "Post not found", http.StatusNotFound, wantsJSON)
 		return
@@ -101,9 +101,9 @@ func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 	md := r.PostFormValue("body")
 	html := services.MdToHtml([]byte(md))
 
-	newPost, err := h.queries.PostCreate(
+	newPost, err := h.queries.CreatePost(
 		r.Context(),
-		db.PostCreateParams{
+		db.CreatePostParams{
 			Title: r.PostFormValue("title"),
 			Body:  string(html),
 		},
