@@ -6,10 +6,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func InitConnection() (*pgx.Conn, error) {
+func InitConnection() (*pgxpool.Pool, error) {
 	dbUrl := os.Getenv("DATABASE_URL")
 	if dbUrl == "" {
 		return nil, fmt.Errorf("DATABASE_URL is not set")
@@ -17,7 +17,7 @@ func InitConnection() (*pgx.Conn, error) {
 
 	bgCtx := context.Background()
 
-	conn, err := pgx.Connect(bgCtx, dbUrl)
+	pool, err := pgxpool.New(bgCtx, dbUrl)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create connection: %w", err)
 	}
@@ -25,10 +25,10 @@ func InitConnection() (*pgx.Conn, error) {
 	tempCtx, cancel := context.WithTimeout(bgCtx, 5*time.Second)
 	defer cancel()
 
-	if err := conn.Ping(tempCtx); err != nil {
-		conn.Close(bgCtx)
+	if err := pool.Ping(tempCtx); err != nil {
+		pool.Close()
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
-	return conn, nil
+	return pool, nil
 }

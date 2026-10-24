@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -14,14 +13,14 @@ import (
 
 func main() {
 	// Establish a connection to the database.
-	conn, err := db.InitConnection()
+	dbPool, err := db.InitConnection()
 	if err != nil {
 		log.Fatalf("Unable to establish database connection: %v\n", err)
 	}
-	defer conn.Close(context.Background())
+	defer dbPool.Close()
 
 	// Serve the site.
-	postHandler := handlers.NewPostHandler(conn)
+	postHandler := handlers.NewPostHandler(dbPool)
 
 	router := router.NewRouter(
 		router.Handlers{

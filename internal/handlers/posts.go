@@ -6,22 +6,22 @@ import (
 	"html/template"
 	"net/http"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rqpt/blog/internal/db"
 	"github.com/rqpt/blog/internal/helpers"
 	"github.com/rqpt/blog/internal/renderer"
 	"github.com/rqpt/blog/internal/services"
 )
 
-func NewPostHandler(conn *pgx.Conn) *PostHandler {
+func NewPostHandler(dbPool *pgxpool.Pool) *PostHandler {
 	return &PostHandler{
-		conn:    conn,
-		queries: db.New(conn),
+		dbPool:  dbPool,
+		queries: db.New(dbPool),
 	}
 }
 
 type PostHandler struct {
-	conn    *pgx.Conn
+	dbPool  *pgxpool.Pool
 	queries *db.Queries
 }
 
