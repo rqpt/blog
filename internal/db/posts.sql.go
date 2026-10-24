@@ -12,12 +12,9 @@ import (
 )
 
 const postCreate = `-- name: PostCreate :one
-INSERT INTO posts (
-    title, body
-) VALUES (
-    $1, $2
-)
-RETURNING id, title, created_at
+INSERT INTO posts (title, body)
+VALUES ($1, $2)
+RETURNING id, title, slug, created_at
 `
 
 type PostCreateParams struct {
@@ -28,18 +25,55 @@ type PostCreateParams struct {
 type PostCreateRow struct {
 	ID        int64              `json:"id"`
 	Title     string             `json:"title"`
+	Slug      string             `json:"slug"`
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
 func (q *Queries) PostCreate(ctx context.Context, arg PostCreateParams) (PostCreateRow, error) {
 	row := q.db.QueryRow(ctx, postCreate, arg.Title, arg.Body)
 	var i PostCreateRow
-	err := row.Scan(&i.ID, &i.Title, &i.CreatedAt)
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.Slug,
+		&i.CreatedAt,
+	)
 	return i, err
 }
 
+const postIndex = `-- name: PostIndex :many
+SELECT id, title, body, created_at, updated_at, slug FROM posts
+`
+
+func (q *Queries) PostIndex(ctx context.Context) ([]Post, error) {
+	rows, err := q.db.Query(ctx, postIndex)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Post
+	for rows.Next() {
+		var i Post
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Body,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Slug,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const postShow = `-- name: PostShow :one
-SELECT id, title, body, created_at, updated_at FROM posts
+SELECT id, title, body, created_at, updated_at, slug FROM posts
 WHERE id = $1
 `
 
@@ -52,6 +86,7 @@ func (q *Queries) PostShow(ctx context.Context, id int64) (Post, error) {
 		&i.Body,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Slug,
 	)
 	return i, err
 }

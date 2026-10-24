@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 )
 
-type PostProps struct {
+type PostShowProps struct {
 	Title string
 	Body  template.HTML
 }

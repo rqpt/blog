@@ -2,4 +2,10 @@
 
 {{ define "content" }}
   <h1>Welcome to my blog!</h1>
+
+  <ul>
+    {{ range . }}
+      <li><a href="/{{ .Slug }}">{{ .Title }}</a></li>
+    {{ end }}
+  </ul>
 {{ end }}
