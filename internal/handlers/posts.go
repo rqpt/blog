@@ -15,13 +15,11 @@ import (
 
 func NewPostHandler(dbPool *pgxpool.Pool) *PostHandler {
 	return &PostHandler{
-		dbPool:  dbPool,
 		queries: db.New(dbPool),
 	}
 }
 
 type PostHandler struct {
-	dbPool  *pgxpool.Pool
 	queries *db.Queries
 }
 
