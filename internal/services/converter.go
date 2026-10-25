@@ -3,7 +3,6 @@ package services
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"strings"
 
 	"github.com/adrg/frontmatter"
@@ -12,43 +11,47 @@ import (
 	"github.com/gomarkdown/markdown/parser"
 )
 
-func MdToHtml(md string) (ConvertedPost, error) {
-	convertedPost := ConvertedPost{}
-	fm := Frontmatter{}
+func MdToHtml(md string) (*ConvertedPost, error) {
+	var (
+		convertedPost ConvertedPost
+		fm            Frontmatter
+	)
 
 	mdBody, err := frontmatter.MustParse(
 		strings.NewReader(md),
 		&fm,
 	)
 	if err != nil {
-		return ConvertedPost{}, err
+		return nil, err
 	}
 
 	if err := fm.Validate(); err != nil {
-		return ConvertedPost{}, err
+		return nil, err
 	}
 
 	convertedPost.Frontmatter, err = json.Marshal(&fm)
 	if err != nil {
-		return ConvertedPost{}, err
+		return nil, err
 	}
 
 	convertedPost.Title = fm.Title
 
-	// Create markdown parser with extensions.
-	extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock
+	extensions := parser.CommonExtensions |
+		parser.AutoHeadingIDs |
+		parser.NoEmptyLineBeforeBlock
+
 	p := parser.NewWithExtensions(extensions)
 	bodyAST := p.Parse(mdBody)
 
+	renderer := html.NewRenderer(html.RendererOptions{
+		Flags: html.CommonFlags | html.HrefTargetBlank,
+	})
 
-	// Create HTML renderer with extensions.
-	htmlFlags := html.CommonFlags | html.HrefTargetBlank
-	opts := html.RendererOptions{Flags: htmlFlags}
-	renderer := html.NewRenderer(opts)
+	convertedPost.Body = string(
+		markdown.Render(bodyAST, renderer),
+	)
 
-	convertedPost.Body = string(markdown.Render(bodyAST, renderer))
-
-	return convertedPost, nil
+	return &convertedPost, nil
 }
 
 type ConvertedPost struct {
@@ -65,15 +68,21 @@ type Frontmatter struct {
 
 func (fm Frontmatter) Validate() error {
 	if strings.TrimSpace(fm.Title) == "" {
-		return errors.New("frontmatter: title is required")
+		return errors.New(
+			"frontmatter: title is required",
+		)
 	}
 
 	if strings.TrimSpace(fm.Description) == "" {
-		return errors.New("frontmatter: description is required")
+		return errors.New(
+			"frontmatter: description is required",
+		)
 	}
 
 	if len(fm.Tags) == 0 {
-		return errors.New("frontmatter: at least one tag is required")
+		return errors.New(
+			"frontmatter: at least one tag is required",
+		)
 	}
 
 	for _, tag := range fm.Tags {
