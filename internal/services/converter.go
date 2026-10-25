@@ -40,10 +40,6 @@ func MdToHtml(md string) (ConvertedPost, error) {
 	p := parser.NewWithExtensions(extensions)
 	bodyAST := p.Parse(mdBody)
 
-	test := bodyAST.GetChildren()
-	for t := range test {
-		fmt.Printf("%v", t)
-	}
 
 	// Create HTML renderer with extensions.
 	htmlFlags := html.CommonFlags | html.HrefTargetBlank
