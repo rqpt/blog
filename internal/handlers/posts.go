@@ -31,7 +31,12 @@ func (h *PostHandler) Index(w http.ResponseWriter, r *http.Request) {
 
 	posts, err := h.queries.IndexPosts(r.Context())
 	if err != nil {
-		helpers.RespondError(w, "Posts not found", http.StatusNotFound, wantsJSON)
+		helpers.RespondError(
+			w,
+			"Posts not found",
+			http.StatusNotFound,
+			wantsJSON,
+		)
 		return
 	}
 
@@ -54,13 +59,23 @@ func (h *PostHandler) Show(w http.ResponseWriter, r *http.Request) {
 
 	pathID, err := helpers.ParseID(pathSlug)
 	if pathID == 0 || err != nil {
-		helpers.RespondError(w, "Post not found", http.StatusNotFound, wantsJSON)
+		helpers.RespondError(
+			w,
+			"Post not found",
+			http.StatusNotFound,
+			wantsJSON,
+		)
 		return
 	}
 
 	post, err := h.queries.ShowPost(r.Context(), pathID)
 	if err != nil {
-		helpers.RespondError(w, "Post not found", http.StatusNotFound, wantsJSON)
+		helpers.RespondError(
+			w,
+			"Post not found",
+			http.StatusNotFound,
+			wantsJSON,
+		)
 		return
 	}
 
@@ -149,13 +164,23 @@ func (h *PostHandler) Delete(w http.ResponseWriter, r *http.Request) {
 
 	pathID, err := helpers.ParseID(pathSlug)
 	if pathID == 0 || err != nil {
-		helpers.RespondError(w, "Post not found", http.StatusNotFound, true)
+		helpers.RespondError(
+			w,
+			"Post not found",
+			http.StatusNotFound,
+			true,
+		)
 		return
 	}
 
 	err = h.queries.DeletePost(r.Context(), pathID)
 	if err != nil {
-		helpers.RespondError(w, err.Error(), http.StatusInternalServerError, true)
+		helpers.RespondError(
+			w,
+			err.Error(),
+			http.StatusInternalServerError,
+			true,
+		)
 		return
 	}
 
