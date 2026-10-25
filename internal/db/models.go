@@ -9,10 +9,11 @@ import (
 )
 
 type Post struct {
-	ID        int64              `json:"id"`
-	Title     string             `json:"title"`
-	Body      string             `json:"body"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
-	Slug      string             `json:"slug"`
+	ID          int64              `json:"id"`
+	Title       string             `json:"title"`
+	Body        string             `json:"body"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+	Slug        string             `json:"slug"`
+	Frontmatter []byte             `json:"frontmatter"`
 }

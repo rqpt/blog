@@ -89,21 +89,22 @@ func (h *PostHandler) Show(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
-	// TODO: When we create a post, the markdown should be split into
-	// frontmatter and content. Frontmatter should be saved on a new column
-	// and used, among other things, for SEO meta tags. Content used for html.
-
 	// TODO: Validation for unique title.
 	w.Header().Set("Content-Type", "application/json")
 
-	md := r.PostFormValue("body")
-	html := services.MdToHtml([]byte(md))
+	md := r.PostFormValue("md")
+	convertedPost, err := services.MdToHtml(md)
+	if err != nil {
+		helpers.RespondError(w, err.Error(), http.StatusBadRequest, true)
+		return
+	}
 
 	newPost, err := h.queries.CreatePost(
 		r.Context(),
 		db.CreatePostParams{
-			Title: r.PostFormValue("title"),
-			Body:  string(html),
+			Title:       convertedPost.Title,
+			Body:        convertedPost.Body,
+			Frontmatter: convertedPost.Frontmatter,
 		},
 	)
 	if err != nil {

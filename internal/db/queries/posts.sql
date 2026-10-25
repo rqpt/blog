@@ -6,8 +6,8 @@ SELECT * FROM posts
 WHERE id = $1;
 
 -- name: CreatePost :one
-INSERT INTO posts (title, body)
-VALUES ($1, $2)
+INSERT INTO posts (title, body, frontmatter)
+VALUES ($1, $2, $3)
 RETURNING id, title, slug, created_at;
 
 -- name: DeletePost :exec
