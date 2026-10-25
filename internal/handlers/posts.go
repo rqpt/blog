@@ -90,12 +90,27 @@ func (h *PostHandler) Show(w http.ResponseWriter, r *http.Request) {
 
 func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 	// TODO: Validation for unique title.
+	// TODO: Validation that md form value is present.
 	w.Header().Set("Content-Type", "application/json")
 
 	md := r.PostFormValue("md")
 	convertedPost, err := services.MdToHtml(md)
 	if err != nil {
-		helpers.RespondError(w, err.Error(), http.StatusBadRequest, true)
+		helpers.RespondError(
+			w,
+			err.Error(),
+			http.StatusBadRequest,
+			true,
+		)
+		return
+	}
+	if convertedPost == nil {
+		helpers.RespondError(
+			w,
+			"failed to convert Markdown",
+			http.StatusInternalServerError,
+			true,
+		)
 		return
 	}
 
@@ -108,11 +123,23 @@ func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 	if err != nil {
-		helpers.RespondError(w, err.Error(), http.StatusInternalServerError, true)
+		helpers.RespondError(
+			w,
+			err.Error(),
+			http.StatusInternalServerError,
+			true,
+		)
 		return
 	}
 
-	json.NewEncoder(w).Encode(newPost)
+	if err := json.NewEncoder(w).Encode(newPost); err != nil {
+		helpers.RespondError(
+			w,
+			err.Error(),
+			http.StatusInternalServerError,
+			true,
+		)
+	}
 }
 
 func (h *PostHandler) Delete(w http.ResponseWriter, r *http.Request) {
