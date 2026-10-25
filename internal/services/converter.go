@@ -56,9 +56,9 @@ func MdToHtml(md string) (ConvertedPost, error) {
 }
 
 type ConvertedPost struct {
-	Frontmatter []byte
 	Title       string
 	Body        string
+	Frontmatter []byte
 }
 
 type Frontmatter struct {
