@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func InitConnection() (*pgxpool.Pool, error) {
+func Connect() (*pgxpool.Pool, error) {
 	dbUrl := os.Getenv("DATABASE_URL")
 	if dbUrl == "" {
 		return nil, fmt.Errorf("DATABASE_URL is not set")
