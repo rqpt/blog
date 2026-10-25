@@ -1,6 +1,7 @@
 package services
 
 import (
+	"github.com/adrg/frontmatter"
 	"github.com/gomarkdown/markdown"
 	"github.com/gomarkdown/markdown/html"
 	"github.com/gomarkdown/markdown/parser"
