@@ -31,7 +31,12 @@ func (h *PostHandler) Index(w http.ResponseWriter, r *http.Request) {
 
 	posts, err := h.queries.IndexPosts(r.Context())
 	if err != nil {
-		helpers.RespondError(w, "Posts not found", http.StatusNotFound, wantsJSON)
+		helpers.RespondError(
+			w,
+			"Posts not found",
+			http.StatusNotFound,
+			wantsJSON,
+		)
 		return
 	}
 
@@ -54,13 +59,23 @@ func (h *PostHandler) Show(w http.ResponseWriter, r *http.Request) {
 
 	pathID, err := helpers.ParseID(pathSlug)
 	if pathID == 0 || err != nil {
-		helpers.RespondError(w, "Post not found", http.StatusNotFound, wantsJSON)
+		helpers.RespondError(
+			w,
+			"Post not found",
+			http.StatusNotFound,
+			wantsJSON,
+		)
 		return
 	}
 
 	post, err := h.queries.ShowPost(r.Context(), pathID)
 	if err != nil {
-		helpers.RespondError(w, "Post not found", http.StatusNotFound, wantsJSON)
+		helpers.RespondError(
+			w,
+			"Post not found",
+			http.StatusNotFound,
+			wantsJSON,
+		)
 		return
 	}
 
@@ -89,29 +104,57 @@ func (h *PostHandler) Show(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
-	// TODO: When we create a post, the markdown should be split into
-	// frontmatter and content. Frontmatter should be saved on a new column
-	// and used, among other things, for SEO meta tags. Content used for html.
-
 	// TODO: Validation for unique title.
+	// TODO: Validation that md form value is present.
 	w.Header().Set("Content-Type", "application/json")
 
-	md := r.PostFormValue("body")
-	html := services.MdToHtml([]byte(md))
+	md := r.PostFormValue("md")
+	convertedPost, err := services.MdToHtml(md)
+	if err != nil {
+		helpers.RespondError(
+			w,
+			err.Error(),
+			http.StatusBadRequest,
+			true,
+		)
+		return
+	}
+	if convertedPost == nil {
+		helpers.RespondError(
+			w,
+			"failed to convert Markdown",
+			http.StatusInternalServerError,
+			true,
+		)
+		return
+	}
 
 	newPost, err := h.queries.CreatePost(
 		r.Context(),
 		db.CreatePostParams{
-			Title: r.PostFormValue("title"),
-			Body:  string(html),
+			Title:       convertedPost.Title,
+			Body:        convertedPost.Body,
+			Frontmatter: convertedPost.Frontmatter,
 		},
 	)
 	if err != nil {
-		helpers.RespondError(w, err.Error(), http.StatusInternalServerError, true)
+		helpers.RespondError(
+			w,
+			err.Error(),
+			http.StatusInternalServerError,
+			true,
+		)
 		return
 	}
 
-	json.NewEncoder(w).Encode(newPost)
+	if err := json.NewEncoder(w).Encode(newPost); err != nil {
+		helpers.RespondError(
+			w,
+			err.Error(),
+			http.StatusInternalServerError,
+			true,
+		)
+	}
 }
 
 func (h *PostHandler) Delete(w http.ResponseWriter, r *http.Request) {
@@ -121,13 +164,23 @@ func (h *PostHandler) Delete(w http.ResponseWriter, r *http.Request) {
 
 	pathID, err := helpers.ParseID(pathSlug)
 	if pathID == 0 || err != nil {
-		helpers.RespondError(w, "Post not found", http.StatusNotFound, true)
+		helpers.RespondError(
+			w,
+			"Post not found",
+			http.StatusNotFound,
+			true,
+		)
 		return
 	}
 
 	err = h.queries.DeletePost(r.Context(), pathID)
 	if err != nil {
-		helpers.RespondError(w, err.Error(), http.StatusInternalServerError, true)
+		helpers.RespondError(
+			w,
+			err.Error(),
+			http.StatusInternalServerError,
+			true,
+		)
 		return
 	}
 

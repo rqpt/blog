@@ -12,14 +12,15 @@ import (
 )
 
 const createPost = `-- name: CreatePost :one
-INSERT INTO posts (title, body)
-VALUES ($1, $2)
+INSERT INTO posts (title, body, frontmatter)
+VALUES ($1, $2, $3)
 RETURNING id, title, slug, created_at
 `
 
 type CreatePostParams struct {
-	Title string `json:"title"`
-	Body  string `json:"body"`
+	Title       string `json:"title"`
+	Body        string `json:"body"`
+	Frontmatter []byte `json:"frontmatter"`
 }
 
 type CreatePostRow struct {
@@ -30,7 +31,7 @@ type CreatePostRow struct {
 }
 
 func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (CreatePostRow, error) {
-	row := q.db.QueryRow(ctx, createPost, arg.Title, arg.Body)
+	row := q.db.QueryRow(ctx, createPost, arg.Title, arg.Body, arg.Frontmatter)
 	var i CreatePostRow
 	err := row.Scan(
 		&i.ID,
@@ -52,7 +53,7 @@ func (q *Queries) DeletePost(ctx context.Context, id int64) error {
 }
 
 const indexPosts = `-- name: IndexPosts :many
-SELECT id, title, body, created_at, updated_at, slug FROM posts
+SELECT id, title, body, created_at, updated_at, slug, frontmatter FROM posts
 `
 
 func (q *Queries) IndexPosts(ctx context.Context) ([]Post, error) {
@@ -71,6 +72,7 @@ func (q *Queries) IndexPosts(ctx context.Context) ([]Post, error) {
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.Slug,
+			&i.Frontmatter,
 		); err != nil {
 			return nil, err
 		}
@@ -83,7 +85,7 @@ func (q *Queries) IndexPosts(ctx context.Context) ([]Post, error) {
 }
 
 const showPost = `-- name: ShowPost :one
-SELECT id, title, body, created_at, updated_at, slug FROM posts
+SELECT id, title, body, created_at, updated_at, slug, frontmatter FROM posts
 WHERE id = $1
 `
 
@@ -97,6 +99,7 @@ func (q *Queries) ShowPost(ctx context.Context, id int64) (Post, error) {
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Slug,
+		&i.Frontmatter,
 	)
 	return i, err
 }

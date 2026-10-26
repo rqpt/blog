@@ -13,7 +13,7 @@ import (
 
 func main() {
 	// Establish a connection to the database.
-	dbPool, err := db.InitConnection()
+	dbPool, err := db.Connect()
 	if err != nil {
 		log.Fatalf("Unable to establish database connection: %v\n", err)
 	}
