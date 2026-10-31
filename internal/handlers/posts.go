@@ -149,8 +149,68 @@ func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *PostHandler) Delete(w http.ResponseWriter, r *http.Request) {
+func (h *PostHandler) Update(w http.ResponseWriter, r *http.Request) {
+	// TODO: A lot of duplication here. Need to refactor somehow.
+	// TODO: Validation for unique title.
+	pathSlug := r.PathValue("post")
 
+	pathID, err := helpers.ParseID(pathSlug)
+	if pathID == 0 || err != nil {
+		helpers.RespondError(
+			w,
+			"Post not found",
+			http.StatusNotFound,
+			true,
+		)
+		return
+	}
+
+	md := r.PostFormValue("md")
+	convertedPost, err := services.MdToHtml(md)
+	if err != nil {
+		helpers.RespondError(
+			w,
+			err.Error(),
+			http.StatusBadRequest,
+			true,
+		)
+		return
+	}
+	if convertedPost == nil {
+		helpers.RespondError(
+			w,
+			"failed to convert Markdown",
+			http.StatusInternalServerError,
+			true,
+		)
+		return
+	}
+
+	err = h.queries.UpdatePost(
+		r.Context(),
+		db.UpdatePostParams{
+			ID:          pathID,
+			Title:       convertedPost.Title,
+			Body:        convertedPost.Body,
+			Frontmatter: convertedPost.Frontmatter,
+		},
+	)
+	if err != nil {
+		helpers.RespondError(
+			w,
+			err.Error(),
+			http.StatusInternalServerError,
+			true,
+		)
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": fmt.Sprintf("Successfully updated post #%d", pathID),
+	})
+}
+
+func (h *PostHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	pathSlug := r.PathValue("post")
 
 	pathID, err := helpers.ParseID(pathSlug)
