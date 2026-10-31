@@ -38,8 +38,7 @@ func (h *PostHandler) Index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if wantsJSON {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(posts)
+		helpers.RespondJSON(w, posts)
 		return
 	}
 
@@ -49,16 +48,8 @@ func (h *PostHandler) Index(w http.ResponseWriter, r *http.Request) {
 func (h *PostHandler) Show(w http.ResponseWriter, r *http.Request) {
 	wantsJSON := helpers.AcceptsJSON(r)
 
-	pathSlug := r.PathValue("post")
-
-	pathID, err := helpers.ParseID(pathSlug)
-	if pathID == 0 || err != nil {
-		helpers.RespondError(
-			w,
-			"Post not found",
-			http.StatusNotFound,
-			wantsJSON,
-		)
+	pathID, pathSlug, ok := h.parsePathSlug(w, r)
+	if !ok {
 		return
 	}
 
@@ -84,8 +75,7 @@ func (h *PostHandler) Show(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if wantsJSON {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(post)
+		helpers.RespondJSON(w, post)
 		return
 	}
 
@@ -100,24 +90,8 @@ func (h *PostHandler) Show(w http.ResponseWriter, r *http.Request) {
 func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 	// TODO: Validation for unique title.
 	// TODO: Validation that md form value is present.
-	md := r.PostFormValue("md")
-	convertedPost, err := services.MdToHtml(md)
-	if err != nil {
-		helpers.RespondError(
-			w,
-			err.Error(),
-			http.StatusBadRequest,
-			true,
-		)
-		return
-	}
-	if convertedPost == nil {
-		helpers.RespondError(
-			w,
-			"failed to convert Markdown",
-			http.StatusInternalServerError,
-			true,
-		)
+	convertedPost, ok := h.parseMarkdown(w, r)
+	if !ok {
 		return
 	}
 
@@ -139,54 +113,22 @@ func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(newPost); err != nil {
-		helpers.RespondError(
-			w,
-			err.Error(),
-			http.StatusInternalServerError,
-			true,
-		)
-	}
+	json.NewEncoder(w).Encode(newPost)
 }
 
 func (h *PostHandler) Update(w http.ResponseWriter, r *http.Request) {
-	// TODO: A lot of duplication here. Need to refactor somehow.
 	// TODO: Validation for unique title.
-	pathSlug := r.PathValue("post")
-
-	pathID, err := helpers.ParseID(pathSlug)
-	if pathID == 0 || err != nil {
-		helpers.RespondError(
-			w,
-			"Post not found",
-			http.StatusNotFound,
-			true,
-		)
+	pathID, _, ok := h.parsePathSlug(w, r)
+	if !ok {
 		return
 	}
 
-	md := r.PostFormValue("md")
-	convertedPost, err := services.MdToHtml(md)
-	if err != nil {
-		helpers.RespondError(
-			w,
-			err.Error(),
-			http.StatusBadRequest,
-			true,
-		)
-		return
-	}
-	if convertedPost == nil {
-		helpers.RespondError(
-			w,
-			"failed to convert Markdown",
-			http.StatusInternalServerError,
-			true,
-		)
+	convertedPost, ok := h.parseMarkdown(w, r)
+	if !ok {
 		return
 	}
 
-	err = h.queries.UpdatePost(
+	err := h.queries.UpdatePost(
 		r.Context(),
 		db.UpdatePostParams{
 			ID:          pathID,
@@ -211,20 +153,12 @@ func (h *PostHandler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *PostHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	pathSlug := r.PathValue("post")
-
-	pathID, err := helpers.ParseID(pathSlug)
-	if pathID == 0 || err != nil {
-		helpers.RespondError(
-			w,
-			"Post not found",
-			http.StatusNotFound,
-			true,
-		)
+	pathID, _, ok := h.parsePathSlug(w, r)
+	if !ok {
 		return
 	}
 
-	err = h.queries.DeletePost(r.Context(), pathID)
+	err := h.queries.DeletePost(r.Context(), pathID)
 	if err != nil {
 		helpers.RespondError(
 			w,
@@ -238,4 +172,53 @@ func (h *PostHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": fmt.Sprintf("Successfully deleted post #%d", pathID),
 	})
+}
+
+func (h *PostHandler) parseMarkdown(
+	w http.ResponseWriter,
+	r *http.Request,
+) (*services.ConvertedPost, bool) {
+	md := r.PostFormValue("md")
+
+	convertedPost, err := services.MdToHtml(md)
+	if err != nil {
+		helpers.RespondError(
+			w,
+			err.Error(),
+			http.StatusBadRequest,
+			true,
+		)
+		return nil, false
+	}
+	if convertedPost == nil {
+		helpers.RespondError(
+			w,
+			"failed to convert Markdown",
+			http.StatusInternalServerError,
+			true,
+		)
+		return nil, false
+	}
+
+	return convertedPost, true
+}
+
+func (h *PostHandler) parsePathSlug(
+	w http.ResponseWriter,
+	r *http.Request,
+) (int64, string, bool) {
+	pathSlug := r.PathValue("post")
+
+	pathID, err := helpers.ParseID(pathSlug)
+	if pathID == 0 || err != nil {
+		helpers.RespondError(
+			w,
+			"Post not found",
+			http.StatusNotFound,
+			true,
+		)
+		return 0, "", false
+	}
+
+	return pathID, pathSlug, true
 }
