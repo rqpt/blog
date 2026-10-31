@@ -24,9 +24,6 @@ type PostHandler struct {
 }
 
 func (h *PostHandler) Index(w http.ResponseWriter, r *http.Request) {
-	// TODO: Maybe set the Vary Accept header through middleware?
-	w.Header().Add("Vary", "Accept")
-
 	wantsJSON := helpers.AcceptsJSON(r)
 
 	posts, err := h.queries.IndexPosts(r.Context())
@@ -50,9 +47,6 @@ func (h *PostHandler) Index(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *PostHandler) Show(w http.ResponseWriter, r *http.Request) {
-	// TODO: Maybe set the Vary Accept header through middleware?
-	w.Header().Add("Vary", "Accept")
-
 	wantsJSON := helpers.AcceptsJSON(r)
 
 	pathSlug := r.PathValue("post")
@@ -106,8 +100,6 @@ func (h *PostHandler) Show(w http.ResponseWriter, r *http.Request) {
 func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 	// TODO: Validation for unique title.
 	// TODO: Validation that md form value is present.
-	w.Header().Set("Content-Type", "application/json")
-
 	md := r.PostFormValue("md")
 	convertedPost, err := services.MdToHtml(md)
 	if err != nil {
@@ -158,7 +150,6 @@ func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *PostHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-type", "application/json")
 
 	pathSlug := r.PathValue("post")
 
