@@ -50,7 +50,7 @@ func (h *PostHandler) Index(w http.ResponseWriter, r *http.Request) {
 func (h *PostHandler) Show(w http.ResponseWriter, r *http.Request) {
 	wantsJSON := helpers.AcceptsJSON(r)
 
-	pathID, pathSlug, ok := h.parsePathSlug(w, r)
+	pathID, pathSlug, ok := h.parsePathSlug(w, r, wantsJSON)
 	if !ok {
 		return
 	}
@@ -94,7 +94,7 @@ func (h *PostHandler) Show(w http.ResponseWriter, r *http.Request) {
 func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 	// TODO: Validation for unique title.
 	// TODO: Validation that md form value is present.
-	convertedPost, ok := h.parseMarkdown(w, r)
+	convertedPost, ok := h.parseMarkdown(w, r, true)
 	if !ok {
 		return
 	}
@@ -122,12 +122,12 @@ func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 func (h *PostHandler) Update(w http.ResponseWriter, r *http.Request) {
 	// TODO: Validation for unique title.
-	pathID, _, ok := h.parsePathSlug(w, r)
+	pathID, _, ok := h.parsePathSlug(w, r, true)
 	if !ok {
 		return
 	}
 
-	convertedPost, ok := h.parseMarkdown(w, r)
+	convertedPost, ok := h.parseMarkdown(w, r, true)
 	if !ok {
 		return
 	}
@@ -157,7 +157,7 @@ func (h *PostHandler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *PostHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	pathID, _, ok := h.parsePathSlug(w, r)
+	pathID, _, ok := h.parsePathSlug(w, r, true)
 	if !ok {
 		return
 	}
@@ -181,6 +181,7 @@ func (h *PostHandler) Delete(w http.ResponseWriter, r *http.Request) {
 func (h *PostHandler) parseMarkdown(
 	w http.ResponseWriter,
 	r *http.Request,
+	wantsJson bool,
 ) (*services.ConvertedPost, bool) {
 	md := r.PostFormValue("md")
 
@@ -190,7 +191,7 @@ func (h *PostHandler) parseMarkdown(
 			w,
 			err.Error(),
 			http.StatusBadRequest,
-			true,
+			wantsJson,
 		)
 		return nil, false
 	}
@@ -199,7 +200,7 @@ func (h *PostHandler) parseMarkdown(
 			w,
 			"failed to convert Markdown",
 			http.StatusInternalServerError,
-			true,
+			wantsJson,
 		)
 		return nil, false
 	}
@@ -210,6 +211,7 @@ func (h *PostHandler) parseMarkdown(
 func (h *PostHandler) parsePathSlug(
 	w http.ResponseWriter,
 	r *http.Request,
+	wantsJson bool,
 ) (int64, string, bool) {
 	pathSlug := r.PathValue("post")
 
@@ -219,7 +221,7 @@ func (h *PostHandler) parsePathSlug(
 			w,
 			"Post not found",
 			http.StatusNotFound,
-			true,
+			wantsJson,
 		)
 		return 0, "", false
 	}
