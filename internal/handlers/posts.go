@@ -38,7 +38,9 @@ func (h *PostHandler) Index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if wantsJSON {
-		helpers.RespondJSON(w, posts)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(posts)
+
 		return
 	}
 
@@ -75,7 +77,9 @@ func (h *PostHandler) Show(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if wantsJSON {
-		helpers.RespondJSON(w, post)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(post)
+
 		return
 	}
 
