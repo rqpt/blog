@@ -26,7 +26,7 @@ func main() {
 		},
 	)
 
-	server := server.New(router)
+	server := server.NewServer(router)
 
 	log.Fatal(server.ListenAndServe())
 }

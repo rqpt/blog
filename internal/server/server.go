@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func New(router http.Handler) *http.Server {
+func NewServer(router http.Handler) *http.Server {
 	appPort := os.Getenv("APP_PORT")
 	if appPort == "" {
 		log.Fatal("APP_PORT is not set")
