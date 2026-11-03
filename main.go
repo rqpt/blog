@@ -1,14 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"net/http"
-	"os"
 
 	"github.com/rqpt/blog/internal/db"
 	"github.com/rqpt/blog/internal/handlers"
 	"github.com/rqpt/blog/internal/router"
+	"github.com/rqpt/blog/internal/server"
 )
 
 func main() {
@@ -28,15 +26,7 @@ func main() {
 		},
 	)
 
-	appPort := os.Getenv("APP_PORT")
-	if appPort == "" {
-		log.Fatal("APP_PORT is not set")
-	}
-
-	server := http.Server{
-		Addr:    fmt.Sprint(":", appPort),
-		Handler: router,
-	}
+	server := server.New(router)
 
 	log.Fatal(server.ListenAndServe())
 }
