@@ -103,3 +103,26 @@ func (q *Queries) ShowPost(ctx context.Context, id int64) (Post, error) {
 	)
 	return i, err
 }
+
+const updatePost = `-- name: UpdatePost :exec
+UPDATE posts
+SET title = $2, body = $3, frontmatter = $4
+WHERE id = $1
+`
+
+type UpdatePostParams struct {
+	ID          int64  `json:"id"`
+	Title       string `json:"title"`
+	Body        string `json:"body"`
+	Frontmatter []byte `json:"frontmatter"`
+}
+
+func (q *Queries) UpdatePost(ctx context.Context, arg UpdatePostParams) error {
+	_, err := q.db.Exec(ctx, updatePost,
+		arg.ID,
+		arg.Title,
+		arg.Body,
+		arg.Frontmatter,
+	)
+	return err
+}

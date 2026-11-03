@@ -33,10 +33,10 @@ func main() {
 		log.Fatal("APP_PORT is not set")
 	}
 
-	log.Fatal(
-		http.ListenAndServe(
-			fmt.Sprint(":", appPort),
-			router,
-		),
-	)
+	server := http.Server{
+		Addr:    fmt.Sprint(":", appPort),
+		Handler: router,
+	}
+
+	log.Fatal(server.ListenAndServe())
 }

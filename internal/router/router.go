@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/rqpt/blog/internal/handlers"
+	"github.com/rqpt/blog/internal/middleware"
 )
 
 type Handlers struct {
@@ -11,26 +12,21 @@ type Handlers struct {
 }
 
 func NewRouter(h Handlers) http.Handler {
-	mux := http.NewServeMux()
-
-	// TODO: post create, update and delete should have some kind of auth
-	// middleware, and request rate limit associated with them.
-	mux.HandleFunc("POST /", h.Posts.Create)
-	mux.HandleFunc("DELETE /{post}", h.Posts.Delete)
-
-	mux.HandleFunc("GET /{$}", h.Posts.Index)
-	mux.HandleFunc("GET /{post}", h.Posts.Show)
-
-	mux.Handle("GET /static/", static())
-
-	return mux
-}
-
-func static() http.Handler {
-	return http.StripPrefix(
-		"/static/",
-		http.FileServer(http.Dir(
-			"internal/renderer/resources/public",
-		)),
+	globalMiddleware := middleware.CreateStack(
+		middleware.Logging,
 	)
+
+	router := http.NewServeMux()
+
+	publicMux := newPublicMux(h)
+	router.Handle("/", middleware.Unprotected(
+		publicMux,
+	))
+
+	adminMux := newAdminMux(h)
+	router.Handle("/admin/", middleware.Protected(
+		http.StripPrefix("/admin", adminMux),
+	))
+
+	return globalMiddleware(router)
 }
