@@ -7,6 +7,7 @@ import (
 
 	"github.com/adrg/frontmatter"
 	"github.com/gomarkdown/markdown"
+	"github.com/gomarkdown/markdown/ast"
 	"github.com/gomarkdown/markdown/html"
 	"github.com/gomarkdown/markdown/parser"
 )
@@ -42,6 +43,27 @@ func MdToHtml(md string) (*ConvertedPost, error) {
 
 	p := parser.NewWithExtensions(extensions)
 	bodyAST := p.Parse(mdBody)
+
+	nodeList := bodyAST.GetChildren()
+	firstNode, ok := nodeList[0].(*ast.Heading)
+	if !ok || firstNode.Level != 1 {
+		newHeading := ast.Heading{
+			Level:        1,
+			HeadingID:    "",
+			IsTitleblock: true,
+			IsSpecial:    false,
+		}
+
+		headingText := ast.Text{
+			Leaf: ast.Leaf{Literal: []byte(convertedPost.Title)},
+		}
+
+		newHeading.SetChildren([]ast.Node{&headingText})
+
+		newNodeList := []ast.Node{&newHeading}
+		newNodeList = append(newNodeList, nodeList...)
+		bodyAST.SetChildren(newNodeList)
+	}
 
 	renderer := html.NewRenderer(html.RendererOptions{
 		Flags: html.CommonFlags | html.HrefTargetBlank,
